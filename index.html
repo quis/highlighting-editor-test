@@ -1,0 +1,97 @@
+<html>
+  <head>
+    <title>Edit</title>
+    <style>
+      textarea, #background, #foreground {
+        display: block;
+        border: 2px solid #6F777B;
+        box-sizing: border-box;
+        width: 500px;
+        height: 500px;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        margin: 0;
+        padding: 0;
+        font-family: "Heveltica Neue", helvetica, sans-serif;
+        font-size: 20px;
+        padding: 10px;
+        line-height: 1.25;
+      }
+      textarea {
+        z-index: 20;
+        background: transparent;
+      }
+      textarea:focus {
+        outline: 5px solid orange;
+      }
+      #background, #foreground {
+        pointer-events: none;
+        color: transparent;
+        white-space: pre-wrap;
+      }
+      #background {
+        z-index: 10;
+      }
+      #foreground {
+        z-index: 30;
+      }
+      #background .tag {
+        background: #2B8CC4;
+        border-top: 2px solid #2B8CC4;
+        border-bottom: 2px solid #2B8CC4;
+        border-radius: 3px;
+        color: transparent;
+        display: inline;
+      }
+      #foreground .tag {
+        color: white;
+        text-shadow: 0 -1px 0 #2B8CC4, 0 1px 0 #2B8CC4;
+      }
+      #foreground .hidden-brackets {
+        color: #2B8CC4;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-module="highlighting-textarea">
+      <textarea>Your tax for registration ((registration number)) expires on ((date)). Renew online at www.gov.uk/vehicletax</textarea>
+    </div>
+
+  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script>
+    $(function() {
+
+      $("[data-module='highlighting-textarea']").each(function(){
+
+        $(this).prepend("<div id='background'/><div id='foreground'/>");
+        var $t = $("textarea", this),
+            $b = $("#background", this),
+            $f = $("#foreground", this),
+            content,
+            update = function update(event) {
+              var newContent = $t.val()
+              if (content === newContent) return;
+              buffer = newContent.replace(/\(\([^\)\(]+\)\)/g, function(match) {
+                return (
+                  "<span class='tag'>" +
+                    "<span class='hidden-brackets'>((</span>" +
+                    match.substring(2, match.length - 2) +
+                    "<span class='hidden-brackets'>))</span>" +
+                  "</span>"
+                );
+              });
+
+              $b.html(buffer)
+              $f.html(buffer)
+            };
+
+        $t.on("input", update).trigger("input");
+
+      })
+
+    });
+
+  </script>
+  </body>
+</html>
