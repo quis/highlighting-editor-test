@@ -4,7 +4,6 @@
     <style>
       textarea, #background, #foreground {
         display: block;
-        border: 2px solid #6F777B;
         box-sizing: border-box;
         width: 500px;
         height: 500px;
@@ -17,8 +16,11 @@
         font-size: 20px;
         padding: 10px;
         line-height: 1.25;
+        overflow: scroll;
+        border: 2px solid transparent;
       }
       textarea {
+        border-color: #6F777B;
         z-index: 20;
         background: transparent;
       }
@@ -64,31 +66,44 @@
 
       $("[data-module='highlighting-textarea']").each(function(){
 
+        var $t, $bf, content, newContent,
+            replaceTag = function(match) {
+
+              return (
+                "<span class='tag'>" +
+                  "<span class='hidden-brackets'>((</span>" +
+                  match.substring(2, match.length - 2) +
+                  "<span class='hidden-brackets'>))</span>" +
+                "</span>"
+              );
+
+            },
+            replaceTags = function(content) {
+
+              return content.replace(/\(\([^\)\(]+\)\)/g, replaceTag);
+
+            },
+            update = function(event) {
+
+              if (content === (newContent = $t.val())) return;
+
+              $bf.html(replaceTags(newContent));
+
+            },
+            maintainScrollParity = function() {
+              $bf.scrollTop($t.scrollTop());
+            }
+
         $(this).prepend("<div id='background'/><div id='foreground'/>");
-        var $t = $("textarea", this),
-            $b = $("#background", this),
-            $f = $("#foreground", this),
-            content,
-            update = function update(event) {
-              var newContent = $t.val()
-              if (content === newContent) return;
-              buffer = newContent.replace(/\(\([^\)\(]+\)\)/g, function(match) {
-                return (
-                  "<span class='tag'>" +
-                    "<span class='hidden-brackets'>((</span>" +
-                    match.substring(2, match.length - 2) +
-                    "<span class='hidden-brackets'>))</span>" +
-                  "</span>"
-                );
-              });
+        $t = $("textarea", this);
+        $bf = $("#background, #foreground", this);
 
-              $b.html(buffer)
-              $f.html(buffer)
-            };
+        $t
+          .on("input", update)
+          .on("scroll", maintainScrollParity)
+          .trigger("input");
 
-        $t.on("input", update).trigger("input");
-
-      })
+      });
 
     });
 
